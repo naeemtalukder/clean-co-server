@@ -15,15 +15,17 @@ app.use(
 app.use(express.json());
 
 
-
-
-const uri = "mongodb+srv://clean_co:RzhtKyVYjzGB0cVn@cluster0.wkeh8wb.mongodb.net/?retryWrites=true&w=majority";
+const uri = `mongodb+srv://doctor_admin:AtRSYz5CoO53XqNo@cluster0.ao6h9.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
+console.log(uri);
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
+
+
 
 async function run() {
     try {
         await client.connect();
         const servicesCollection = client.db("cleanCo").collection("service");
+        
         app.get("/service", async (req, res) => {
             const services = await servicesCollection.find({}).toArray();
             console.log(services);
