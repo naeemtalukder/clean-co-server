@@ -1,6 +1,6 @@
 const express = require("express");
 const cors = require("cors");
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -24,14 +24,56 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 async function run() {
     try {
         await client.connect();
-        const servicesCollection = client.db("cleanCo").collection("service");
+        const servicesCollection = client.db("cleanCo").collection("services");
+
         
-        app.get("/service", async (req, res) => {
+        app.get("/get-services", async (req, res) => {
             const services = await servicesCollection.find({}).toArray();
             console.log(services);
 
             res.send(services);
         });
+
+        app.post("/add-services", async (req, res) => {
+          const data = req.body;
+            const result = await servicesCollection.insertOne(data);
+            res.send(result);
+        });
+
+        app.put("/update-services/:id", async (req, res) => {
+          const {id} = req.params;
+          const data = req.body;
+
+          const filter = { _id: ObjectId(id) };
+          const updateDoc = { $set: data };
+          const option = { upsert: true };
+
+          const result = await servicesCollection.updateOne(filter, updateDoc, option);
+
+          res.send(result);
+        });
+        
+        app.delete("/delete-services/:id", async (req, res) => {
+          const {id} = req.params;
+          const query = { _id: ObjectId(id) };
+          const result = await servicesCollection.deleteOne(query);
+
+          res.send(result);
+
+        });
+
+        /* With try catch block */
+        // app.post("/add-services", async (req, res) => {
+        //   try {
+        //     const data = req.body;
+        //     const result = await servicesCollection.insertOne(data);
+        //     res.send({status: true, result: result});
+            
+        //   } catch(error) 
+        //   {
+        //     res.send({status: true, result: result});
+        //   }
+        // });
       
     } finally {
     }
@@ -39,9 +81,28 @@ async function run() {
   run().catch(console.dir);
  
 
-  app.get("/user/:id", async (req, res) => {
-    const id = req.params;
-    console.log(id);
+
+// Body
+  app.get("/dummy-route/user2", async (req, res) => {
+    const data = req.body;
+    
+    res.json(data);
+  });
+
+
+// Query
+  app.get("/dummy-route/user", async (req, res) => {
+    const {name, age} = req.query;
+    console.log(name);
+    console.log(age);
+    res.json(name);
+  });
+
+
+// Param
+  app.get("/dummy-route/user/:id", async (req, res) => {
+    const {id}= req.params;
+   
     res.json(id);
   });
   
